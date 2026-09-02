@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Web Service</title>
+  </head>
+  <body>
+    {% include "customize.html" ignore missing %}
+    <h1>Hello from web-service!</h1>
+    <p>Visitor count: {{ visits }}</p>
+
+    <h2>Ask a question</h2>
+    <form action="{{ url_for('chat') }}" method="post">
+      <textarea name="prompt" rows="4" cols="60" required></textarea>
+      <br />
+      <button type="submit">Send</button>
+    </form>
+  </body>
+</html>
