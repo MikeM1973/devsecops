@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Chat response</title>
+  </head>
+  <body>
+    {% include "customize.html" ignore missing %}
+    <h1>Chat</h1>
+    <h2>Your message</h2>
+    <p>{{ prompt }}</p>
+    {% if thinking %}
+    <h2>Thinking</h2>
+    <pre>{{ thinking }}</pre>
+    {% endif %}
+    <h2>Response</h2>
+    <pre>{{ response }}</pre>
+    <p><a href="{{ url_for('index') }}">Back to the index page</a></p>
+  </body>
+</html>
