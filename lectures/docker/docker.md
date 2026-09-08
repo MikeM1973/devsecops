@@ -19,6 +19,29 @@ Containerizing Services
 
 ---
 
+## Our Project
+
+1. Managed with git
+2. **Running Docker containers**
+3. Orchestrated with Kubernetes
+4. Tested in Gitlab
+5. Deployed with ArgoCD
+6. Monitored with Prometheus and Grafana
+
+---
+
+## Why Containerization?
+
+Modern DevOps projects have many separate components
+
+Each component requires its own libraries and configuration
+
+We wish to deploy, scale, and upgrade each component independently from others
+
+Containerization is one way to allow this
+
+---
+
 ## Docker Containers
 
 - Encapsulate application and libraries
@@ -127,12 +150,12 @@ Execute commands with a running container with `docker exec`
 ```bash
 docker exec container-name whoami
 ```
-Execute the `whoami` command inside `container-name`
+&rarr; Execute the `whoami` command inside `container-name`
 
 ```bash
 docker exec -it container-name bash
 ```
-Start an interactive _bash_ shell inside `container-name`
+&rarr; Start an interactive _bash_ shell inside `container-name`
 
 ---
 
@@ -183,6 +206,22 @@ $\Rightarrow$ Automate any annoying set up
 
 ---
 
+## Using Ephemeral Containers
+
+```bash
+docker run -it --rm ubuntu:26.04
+```
+Container will be deleted when it stops
+
+Any configuration will need to be repeated next time
+$\Rightarrow$ Script any configuration steps
+$\Rightarrow$ Build custom image already configured
+
+All state stored in container will be lost
+$\Rightarrow$ Store important state on docker host; mount onto container
+
+---
+
 ## Docker Volumes
 
 Docker **volumes** mount host directory inside container
@@ -223,6 +262,20 @@ See `project/images/web-service`
 - Environment managed by _uv_
 
 We don't have these libraries installed in the Codespace
+
+---
+
+## Digression: Lock files
+
+Project dependencies stored in two files
+- `pyproject.yaml` lists dependencies author specified
+- `uv.lock` lists all packages installed, with specific versions
+
+If lock file exists, _uv_ can **reproduce** the exact environment
+
+Common DevOps practice; see also `package.json`, `package-lock.json` for _npm_ (_Node.js_); `Cargo.toml`, `Cargo.lock` for _Cargo_ (_Rust_)
+
+Also, helps you develop your **Software Bill of Materials (SBOM)**
 
 ---
 
@@ -311,7 +364,7 @@ See the _Ports_ pane next to _Terminal_
 
 Want to automate building and running our service
 
-`Dockerfile` is text file describing a Docker image
+`Dockerfile` is text file describing how to build a Docker image
 
 ---
 
@@ -475,6 +528,20 @@ FROM python@sha256:c6ead2...cb96fc
 ...
 ```
 
+A digest specifies one unchanging image &hellip;
+
+&hellip; but it can disappear from the source repository.
+
+<!--
+Discussion: Should we specify tags or digests
+Digests: Ensure reproducibility.  Slow supply chain attacks
+Tags: May get bugfixes, upgrades.
+
+Note that source repository can delete an image.  Having its
+digest is not enough to recreate it.  So probably a good idea
+to copy images you need to your own repository.  (Details later.)
+-->
+
 ---
 
 ## Environmental Variables
@@ -506,7 +573,8 @@ ENV VISIT_COUNTER_FILE="/var/lib/web-service/visits.txt"
 ENV OLLAMA_URL="http://localhost:11434"
 ENV OLLAMA_MODEL="qwen3:0.6b"
 
-CMD ["sh", "-c", "gunicorn web_service:app --bind 0.0.0.0:$PORT --timeout 120"]
+CMD ["sh", "-c", \
+     "gunicorn web_service:app --bind 0.0.0.0:$PORT --timeout 120"]
 ```
 
 ---
@@ -518,3 +586,16 @@ docker build . -t web-service-staged
 docker run --rm -v $(pwd)/count:/var/lib/web-service \
     -e PORT=3000 -p 8000:3000 web-service-staged
 ```
+
+`-e PORT=3000` sets the variable _PORT_ to "3000"
+`Dockerfile` uses `$PORT` to set the port _gunicorn_ serves at
+`-p 8000:3000` forwards local port 8000 to container port 3000
+$\Rightarrow$ Still shows up on port 8000 in Codespaces
+
+---
+
+## Security Concerns
+
+- Supply chain (lock versions)
+- Don't run as root
+- Consider rootless docker daemon
