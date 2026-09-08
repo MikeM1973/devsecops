@@ -534,3 +534,16 @@ In the _thedataincubator/devsecops_ repository, there is a branch named _git-exe
 This branch has the secret word of the day in `exercises/git/README.md`
 
 Find out what it is!
+
+---
+
+## Feedback
+
+<!-- _class: lead invert -->
+![](images/session1-qr.png)
+
+[form.typeform.com/to/czK6zf1y](https://form.typeform.com/to/czK6zf1y)
+
+<!--
+Form link
+-->
