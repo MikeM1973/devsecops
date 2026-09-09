@@ -238,6 +238,11 @@ docker run -it --rm --mount type=bind,source=$(pwd)/shared,target=/mnt/volume \
 - `source=` Absolute path on host (error if does not exist)
 - `target=` Absolute path in container
 
+<!--
+Backslash for line continuation.
+There to help us read everything; you can can put it all on one line in the terminal.
+-->
+
 ---
 
 ## Docker Volumes
@@ -385,6 +390,11 @@ COPY . /app
 CMD ["sh", "-c", \
      "uv run gunicorn web_service:app --bind 0.0.0.0:8000 --timeout 120"]
 ```
+
+<!--
+Backslash for line continuation
+Trying to make it readable here, but can be on one line in actual Dockerfile.
+-->
 
 ---
 
@@ -594,8 +604,85 @@ $\Rightarrow$ Still shows up on port 8000 in Codespaces
 
 ---
 
-## Security Concerns
+## Running as User Other than _root_
 
-- Supply chain (lock versions)
-- Don't run as root
-- Consider rootless docker daemon
+- Many containers run as container root user
+  - Not designed for multi-user operation
+- Many container escapes require root access within container
+  - Running as non-root user adds an additional hurdle
+
+Best practice for containers running public services: Run service as a non-root user in container
+
+---
+
+## Creating Another User (pt. 1)
+
+```Dockerfile
+...
+FROM python:3.14-alpine
+
+ARG USER_UID=1000
+ARG USER_GID=1000
+RUN addgroup -g $USER_GID -S appuser && \
+    adduser -u $USER_UID -S appuser -G appuser
+
+WORKDIR /app
+
+COPY --from=builder --chown=appuser:appuser /app/.venv /app/.venv
+...
+```
+
+Creates user _appuser_; switch ownership of copied files to _appuser_
+
+<!--
+This specifies the uid and gid of the added user.  This may be necessary
+to make bind mounts work; more on that later.
+-->
+
+---
+
+## Creating Another User (pt. 2)
+
+```Dockerfile
+...
+ENV OLLAMA_MODEL="qwen3:0.6b"
+
+RUN mkdir $(dirname $VISIT_COUNTER_FILE) && \
+    chown appuser:appuser $(dirname $VISIT_COUNTER_FILE)
+
+USER appuser
+
+CMD ["sh", "-c", \
+     "gunicorn web_service:app --bind 0.0.0.0:$PORT --timeout 120"]
+```
+
+Ensure _appuser_ can write to (default) `$VISIT_COUNTER_FILE`
+
+Switch to _appuser_ to run the Python service
+
+---
+
+## User IDs and Bind Mounts
+
+- File owner IDs are not translated across the container boundary (‽)
+  - Not a problem for the root user
+  - Can be a problem for non-root users
+- Here, we set the _appuser_ id to 1000, same as host user owning files
+  - `ARG` can be set at **build** time:
+    ```Docker
+    docker build --build-arg USER_UID=$(id -u) ...
+    ```
+  - This cannot be adjusted at **run** time
+
+---
+
+## User IDs and Bind Mounts
+
+Other solutions:
+- Run docker container as a different user:
+  ```bash
+  docker run --user $(id -u):$(id -g) ...
+  ```
+  - Not baked into image
+- Add **entrypoint** that creates new user, _chown_, and run application as new user
+- Kubernetes will handle ownership of mounts itself
