@@ -773,3 +773,51 @@ COPY html /usr/share/nginx/html
 Build an image: `docker build . -t my-nginx`
 
 Run a container: `docker run --rm -p 8080:80 my-nginx`
+
+---
+
+## Activity: _ollama_ Inference
+
+<!-- _class: invert -->
+
+_ollama_ is an **inference server** for large language models (LLMs)
+
+We will use it to serve the _qwen3:0.6b_ model
+
+It is packaged in the `ollama/ollama` image on [Docker Hub](https://hub.docker.com/r/ollama/ollama)
+
+Once a container is running, the model needs to be download.  Execute within the running container:
+```bash
+ollama pull qwen3:0.6b
+```
+
+---
+
+## Activity: _ollama_ Inference (Cont.)
+
+<!-- _class: invert -->
+
+The inference server runs on port 11434
+
+You can get a response from the model with the following command:
+```bash
+curl http://localhost:11434/api/generate -d '{
+  "model": "qwen3:0.6b",
+  "prompt": "What is 2+2?",
+  "stream": false
+}'
+```
+
+These instructions are available in `exercises/ollama/README.md`
+
+---
+
+## _ollama_ Solution
+
+```bash
+docker run -d -p 11434:11434 --name ollama-container ollama/ollama
+
+docker exec ollama-container ollama pull qwen3:0.6b
+```
+
+Then access port 11343 on localhost
