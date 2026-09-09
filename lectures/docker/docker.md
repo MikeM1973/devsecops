@@ -686,3 +686,43 @@ Other solutions:
   - Not baked into image
 - Add **entrypoint** that creates new user, _chown_, and run application as new user
 - Kubernetes will handle ownership of mounts itself
+
+---
+
+## Container Registries
+
+A **container registry** stores and services container images
+- [Docker Hub](https://hub.docker.com/)
+- [GitHib Container Registry (ghcr.io)](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry)
+- [Elastic Container Registry](https://aws.amazon.com/ecr/)
+
+Images uploaded for use on production systems
+- Reference as `registry.tld/image:tag` in docker command or file
+- Images automatically pulled when needed
+
+---
+
+## Uploading to a Container Registry
+
+1. Log in to the registry:
+   ```bash
+   docker login registry.tld
+   ```
+2. Tag the local image with the registry name:
+   ```bash
+   docker tag local-image registry.tld/image-name:tag
+   ```
+3. Push the new tag:
+   ```bash
+   docker push registry.tld/image-name:tag
+   ```
+
+<small>_N.B._ We will use the Gitlab container registry in a later session</small>
+<!--
+Demo
+docker login registry.digitalocean.com
+ - Enter token with registry read, update permissions as username and password
+ - or, docker login -u token -p token registry.digitalocean.com
+docker tag web-service registry.digitalocean.com/tdi/web-service:v1
+docker push registry.digitalocean.com/tdi/web-service:v1
+-->
