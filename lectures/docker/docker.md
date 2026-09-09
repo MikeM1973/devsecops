@@ -821,3 +821,16 @@ docker exec ollama-container ollama pull qwen3:0.6b
 ```
 
 Then access port 11343 on localhost
+
+---
+
+## Feedback
+
+<!-- _class: lead invert -->
+![](images/session2-qr.png)
+
+[form.typeform.com/to/MNqDLRtz](https://form.typeform.com/to/MNqDLRtz)
+
+<!--
+Form link: https://form.typeform.com/to/MNqDLRtz
+-->
