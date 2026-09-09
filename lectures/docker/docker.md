@@ -726,3 +726,50 @@ docker login registry.digitalocean.com
 docker tag web-service registry.digitalocean.com/tdi/web-service:v1
 docker push registry.digitalocean.com/tdi/web-service:v1
 -->
+
+---
+
+## Activity: _nginx_ Container
+
+<!-- _class: invert -->
+
+_nginx_ is a web server and reverse proxy
+- It is distributed in the `nginx` container on Docker Hub
+- This container serves files from the `/usr/share/nginx/html` folder
+- The HTTP server listens on port 80
+
+Use the `nginx` image to serve the files in `exercises/nginx/html`
+
+See `exercises/nginx/README.md` for these instructions
+
+---
+
+## _nginx_ Solution #1: Mounting a Volume
+
+```bash
+docker run -it --rm -v $(pwd)/html:/usr/share/nginx/html -p 8080:80 nginx
+```
+This connects port 80 on the container to port 8080 on the host
+<small>On some systems, you may not be able to open low ports if not root.</small>
+
+Slightly fancier:
+```bash
+docker run -d --rm -v $(pwd)/html:/usr/share/nginx/html:ro -p 8080:80 nginx
+```
+`-d` Run as a daemon (disconnect from terminal)
+`-v ...:ro` Mount the volume **read-only**
+
+---
+
+## _nginx_ Solution #2: Custom Image
+
+Create a Dockerfile:
+```Dockerfile
+FROM nginx:latest
+
+COPY html /usr/share/nginx/html
+```
+
+Build an image: `docker build . -t my-nginx`
+
+Run a container: `docker run --rm -p 8080:80 my-nginx`
