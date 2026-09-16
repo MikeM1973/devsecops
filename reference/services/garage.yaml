@@ -1,0 +1,25 @@
+deployment:
+  replicaCount: 1
+
+garage:
+  replicationFactor: "1"
+
+persistence:
+  enabled: true
+  data:
+    storageClass: standard
+    size: 1Gi
+  meta:
+    storageClass: standard
+    size: 100Mi
+
+clusterConfig:
+  enabled: true
+  buckets:
+    - name: visitors
+  keys:
+    my-key:
+      keyId: GK0123456789ABCDEF01234567
+      secretKey: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+      buckets:
+        - visitors

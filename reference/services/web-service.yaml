@@ -1,0 +1,55 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dso-project
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-deployment
+  namespace: dso-project
+  labels:
+    app: web-service
+spec:
+  selector:
+    matchLabels:
+      app: web-service
+  replicas: 5
+  template:
+    metadata:
+      name: web-pod
+      labels:
+        app: web-service
+    spec:
+      containers:
+        - name: web-container
+          image: web-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8000
+              name: "http"
+          env:
+            - name: OLLAMA_URL
+              value: "http://ollama-service.dso-project.svc.cluster.local:11434"
+            - name: AWS_ENDPOINT_URL
+              value: "http://garage.garage.svc.cluster.local:3900"
+            - name: AWS_ACCESS_KEY_ID
+              value: "GK0123456789ABCDEF01234567"
+            - name: AWS_SECRET_ACCESS_KEY
+              value: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+            - name: VISIT_COUNTER_FILE
+              value: "s3://visitors/visits.txt"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-server
+  namespace: dso-project
+spec:
+  type: LoadBalancer
+  selector:
+    app: web-service
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
